@@ -4,6 +4,15 @@
 
 using namespace std;
 
+void problem (Data * data, double upperBound) {
+
+    IloEnv env;
+    IloModel master(env);
+
+    // Objective function
+
+}
+
 int main (int argc, char **argv) {
 
     Data data;
@@ -16,4 +25,5 @@ int main (int argc, char **argv) {
     cout << endl << "Bin capacity: " << data.getBinCapacity() << endl;
 
     return 0;
+
 }
