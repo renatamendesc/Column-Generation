@@ -1,5 +1,6 @@
 #include "data.h"
 #include <iostream>
+#include <cstdio>
 #include <ilcplex/ilocplex.h>
 
 using namespace std;
@@ -9,7 +10,29 @@ void problem (Data * data, double upperBound) {
     IloEnv env;
     IloModel master(env);
 
+    env.setName("Bin Packing Problem");
+    master.setName("Master Problem");
+
+    int numberItems = data->getNItems();
+
     // Objective function
+    IloNumVarArray lambda(env, numberItems);
+    IloExpr obj(env);
+
+    char name[100];
+
+    for (int i = 0; i < numberItems; i++) { // Adds variables to model
+
+        sprintf(name, "lambda(%d)", i);
+        lambda[i].setName(name);
+
+        master.add(lambda[i]);
+
+        // obj += lambda[i]; // Falta adicionar expressao e range das variaveis
+    
+    }
+
+    master.add(IloMinimize(env, obj));
 
 }
 
