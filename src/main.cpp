@@ -39,7 +39,7 @@ void problem (Data * data, double upperBound) {
         constraint = (lambda[i] == 1); // Adds to constraint
         master.add(constraint);
 
-        itemsExists[i][i] = true;
+        itemExists[i][i] = true;
 
     }
 
