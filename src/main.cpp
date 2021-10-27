@@ -15,21 +15,32 @@ void problem (Data * data, double upperBound) {
 
     int numberItems = data->getNItems();
 
-    // Objective function
-    IloNumVarArray lambda(env, numberItems);
-    IloExpr obj(env);
+    IloNumVarArray lambda(env, numberItems, 0, IloInfinity); // Variables
+    IloExpr obj(env); // Objective function
 
-    char name[100];
+    vector <vector <bool>> itemExists (numberItems, vector <bool> (numberItems, false)); // Matriz que indica se o item existe no pacote em questão
 
-    for (int i = 0; i < numberItems; i++) { // Adds variables to model
+    for (int i = 0; i < numberItems; i++) {
 
+        char name[100];
+
+        // Adds variables to model
         sprintf(name, "lambda(%d)", i);
         lambda[i].setName(name);
-
         master.add(lambda[i]);
 
-        // obj += lambda[i]; // Falta adicionar expressao e range das variaveis
-    
+        obj += lambda[i]; // Adds to objective function
+
+        IloRange constraint;
+
+        sprintf(name, "c%d", i);
+        constraint.setName(name);
+
+        constraint = (lambda[i] == 1); // Adds to constraint
+        master.add(constraint);
+
+        itemsExists[i][i] = true;
+
     }
 
     master.add(IloMinimize(env, obj));
