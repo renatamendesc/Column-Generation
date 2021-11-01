@@ -11,7 +11,8 @@ class Subproblem {
         IloModel model;
 
         IloBoolVarArray x;
-        IloExpr obj;
+
+        IloExpr constraint;
 
     public:
         Subproblem (Data &data);

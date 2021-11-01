@@ -11,9 +11,13 @@ class Master {
         IloModel model;
 
         IloNumVarArray lambda;
-        IloExpr obj;
+
+        IloExpr obj; // Objective function
+        IloRangeArray constraints; // Constraints
 
         std::vector <std::vector <bool>> itemExists;
+
+        Data data;
         double upperBound;
 
     public:

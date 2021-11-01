@@ -4,6 +4,7 @@ using namespace std;
 
 Master::Master (Data &data, double upperBound) {
 
+    this->data = data;
     this->upperBound = upperBound;
 
     this->env = IloEnv();
@@ -30,24 +31,28 @@ Master::Master (Data &data, double upperBound) {
 
         this->obj += this->lambda[i]; // Adds to objective function
 
-        IloRange constraint;
-
         sprintf(name, "c%d", i);
-        constraint.setName(name);
+        this->constraints[i].setName(name);
 
-        constraint = (this->lambda[i] == 1); // Adds to constraint
-        this->model.add(constraint);
+        this->constraints[i] = (this->lambda[i] == 1); // Adds to constraint
 
         this->itemExists[i][i] = true;
-
     }
 
+    this->model.add(constraints);
     this->model.add(IloMinimize(env, obj));
 }
 
 void Master::solve () {
 
     IloCplex master(this->model);
+
+    master.solve();
+
+    IloNumArray duals(this->env, this->data.getNItems());
+
+    // Gets dual variables
+    for (int i = 0; i < this->data.getNItems(); i++) duals[i] = master.getDual(this->constraints[i]);
 
     // Criar o subproblema
 
