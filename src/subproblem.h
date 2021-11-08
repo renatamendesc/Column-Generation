@@ -12,10 +12,11 @@ class Subproblem {
 
         IloBoolVarArray x;
 
+        IloExpr obj;
         IloExpr constraint;
 
     public:
-        Subproblem (Data &data);
+        Subproblem (Data &data, IloNumArray &duals);
         void solve ();
 
 };

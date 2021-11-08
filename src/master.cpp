@@ -40,7 +40,7 @@ Master::Master (Data &data, double upperBound) {
     }
 
     this->model.add(constraints);
-    this->model.add(IloMinimize(env, obj));
+    this->model.add(IloMinimize(this->env, this->obj));
 }
 
 void Master::solve () {
@@ -53,6 +53,10 @@ void Master::solve () {
 
     // Gets dual variables
     for (int i = 0; i < this->data.getNItems(); i++) duals[i] = master.getDual(this->constraints[i]);
+
+
+
+    // Adicionando a colunas
 
     // Criar o subproblema
 
