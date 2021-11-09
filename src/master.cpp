@@ -1,4 +1,5 @@
 #include "master.h"
+#include "subproblem.h"
 
 using namespace std;
 
@@ -47,14 +48,14 @@ void Master::solve () {
 
     IloCplex master(this->model);
 
-    master.solve();
-
-    IloNumArray duals(this->env, this->data.getNItems());
+    master.solve(); // Depois adicionar exception
 
     // Gets dual variables
+    IloNumArray duals(this->env, this->data.getNItems());
+
     for (int i = 0; i < this->data.getNItems(); i++) duals[i] = master.getDual(this->constraints[i]);
 
-
+    Subproblem subproblem(data, duals);
 
     // Adicionando a colunas
 

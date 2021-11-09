@@ -32,6 +32,9 @@ void Subproblem::solve () {
 
     IloCplex subproblem(this->model);
 
-    subproblem.solve();
+    subproblem.solve(); // Adicionar exception
+
+    // Se custo reduzido for negativo, adiciona coluna
+    
 
 }
