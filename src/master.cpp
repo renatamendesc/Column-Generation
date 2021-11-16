@@ -59,6 +59,4 @@ void Master::solve () {
 
     // Adicionando a colunas
 
-    // Criar o subproblema
-
 }
