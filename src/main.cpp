@@ -6,48 +6,6 @@
 
 using namespace std;
 
-// void solve (Data * data, double upperBound) {
-
-//     ILoEnv env;
-//     IloModel model;
-
-//     env.setName("Bin Packing Problem");
-//     model.setName("Master Problem");
-
-//     int numberItems = data->getNItems();
-
-//     IloNumVarArray lambda(this->end, numberItems, 0, IloInfinity); // Variables
-//     IloExpr obj(env); // Objective function
-
-//     itemExists = vector <vector <bool>>(numberItems, vector <bool> (numberItems, false)); // Matriz que indica se o item existe no pacote em questão
-
-//     for (int i = 0; i < numberItems; i++) {
-
-//         char name[100];
-
-//         // Adds variables to model
-//         sprintf(name, "lambda(%d)", i);
-//         lambda[i].setName(name);
-//         model.add(lambda[i]);
-
-//         obj += this->lambda[i]; // Adds to objective function
-
-//         IloRange constraint;
-
-//         sprintf(name, "c%d", i);
-//         constraint.setName(name, );
-
-//         constraint = (lambda[i] == 1); // Adds to constraint
-//         model.add(constraint);
-
-//         itemExists[i][i] = true;
-
-//     }
-
-//     model.add(IloMinimize(env, obj));
-
-// }
-
 int main (int argc, char **argv) {
 
     Data data;

@@ -15,11 +15,9 @@ class Subproblem {
         IloExpr obj;
         IloExpr constraint;
 
-        int numberItems;
-
     public:
         Subproblem (Data &data, IloNumArray &duals);
-        void solve ();
+        void solve (Data &data, IloNumArray &duals);
 
         // IloModel getModel();
 

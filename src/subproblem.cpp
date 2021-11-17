@@ -1,4 +1,7 @@
+#include "minknap.c"
 #include "subproblem.h"
+
+#define MIP true
 
 using namespace std;
 
@@ -11,45 +14,66 @@ Subproblem::Subproblem (Data &data, IloNumArray &duals) {
     this->env.setName("Knapsack Problem");
     this->model.setName("Subproblem");
 
-    this->numberItems = data.getNItems();
+    this->capacity = data.getBinCapacity();
+
     this->x = IloBoolVarArray(this->env, numberItems); // Variables
 
     this->obj = IloExpr(env); // Objective function
 
     // Writing objective function
-    for (int i = 0; i < this->numberItems; i++) obj -= duals[i] * x[i];
+    for (int i = 0; i < data.getNItems(); i++) obj -= duals[i] * x[i];
     this->model.add(IloMinimize(this->env, this->obj)); // Minimize objective function
 
     this->constraint = IloExpr(env); // Constraint
     
     // Writing constraint
-    for (int i = 0; i < this->numberItems; i++) this->constraint += data.getItemWeight(i) * x[i];
+    for (int i = 0; i < data.getNItems(); i++) this->constraint += data.getItemWeight(i) * x[i];
     this->model.add(this->constraint <= data.getBinCapacity()); // Adds constraint to model
 
 }
 
-void Subproblem::solve () {
+void Subproblem::solve (Data &data, IloNumArray &duals) {
 
-    IloCplex subproblem(this->model);
+    if (MIP) {
 
-    subproblem.solve(); // Adicionar exception
+        IloCplex subproblem(this->model);
 
-    // Verifies if reduced cost is negative
-    if (1 + subproblem.getObjValue() < 0) {
+        subproblem.solve(); // Adicionar exception
 
-        // Adds column
-        IloNumArray results(this->env, this->numberItems);
-        subproblem.getValues(results);
+        // Verifies if reduced cost is negative
+        if (1 + subproblem.getObjValue() < 0) {
 
-        for (int i = 0; i < this->numberItems; i++) {  
-            if (results[i] >= 0.9) results[i] = 1;
-            else results[i] = 0;
+            // Adds column
+            IloNumArray results(this->env, data.getNItems());
+            subproblem.getValues(results);
+
+            for (int i = 0; i < data.getNItems(); i++) {  
+                if (results[i] >= 0.9) results[i] = 1;
+                else results[i] = 0;
+            }
+
+            // Creates new variable
+            // IloNumVar
+            
+            // Updates matrix
+
         }
 
-        // Creates new variable
-        // IloNumVar
-        
-        // Updates matrix
+    } else {
+
+        int results[data.getNItems()];
+        int profit[data.getNItems()];
+        int weight[data.getNItems()];
+
+        for (int i = 0; i < data.getNItems(); i++) {
+
+            profit[i] = duals[i];
+            weight[i] = data.getItemWeight(i);
+        }
+
+        double z = minknap(data.getNItems(), profit, weight, results, data.getBinCapacity());
+
+        // Falta pegar resultados e adicionar coluna
 
     }
 
