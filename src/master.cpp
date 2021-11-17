@@ -57,6 +57,11 @@ void Master::solve () {
 
     Subproblem subproblem(data, duals);
 
+    vector <int> column(this->data.getNItems);
+    subproblem.solve(data, dual, column);
+
+    
+
     // Adicionando a colunas
 
 }

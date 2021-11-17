@@ -4,6 +4,8 @@
 #include "data.h"
 #include <ilcplex/ilocplex.h>
 
+#define MIP true
+
 class Subproblem {
 
     private:
@@ -17,9 +19,7 @@ class Subproblem {
 
     public:
         Subproblem (Data &data, IloNumArray &duals);
-        void solve (Data &data, IloNumArray &duals);
-
-        // IloModel getModel();
+        void solve (Data &data, IloNumArray &duals, vector <int> &column);
 
 };
 
