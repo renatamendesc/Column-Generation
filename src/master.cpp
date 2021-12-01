@@ -17,9 +17,9 @@ Master::Master (Data &data, double upperBound) {
     int numberItems = data.getNItems();
 
     this->lambda = IloNumVarArray(this->env, numberItems, 0, IloInfinity); // Variables
-    this->obj = IloExpr(env); // Objective function
+    this->objExpression = IloExpr(this->env); // Objective function
 
-    this->itemExists = vector <vector <bool>>(numberItems, vector <bool> (numberItems, false)); // Matriz que indica se o item existe no pacote em questão
+    this->A = vector <vector <bool>>(numberItems, vector <bool> (numberItems, false)); // Matriz que indica se o item existe no pacote em questão
 
     for (int i = 0; i < numberItems; i++) {
 
@@ -30,18 +30,19 @@ Master::Master (Data &data, double upperBound) {
         this->lambda[i].setName(name);
         this->model.add(this->lambda[i]);
 
-        this->obj += this->lambda[i]; // Adds to objective function
+        this->objExpression += this->lambda[i]; // Adds to objective function
 
         sprintf(name, "c%d", i);
         this->constraints[i].setName(name);
 
         this->constraints[i] = (this->lambda[i] == 1); // Adds to constraint
 
-        this->itemExists[i][i] = true;
+        this->A[i][i] = true;
     }
 
     this->model.add(constraints);
-    this->model.add(IloMinimize(this->env, this->obj));
+    this->obj = IloMinimize(this->env, this->objExpression);
+    this->model.add(this->obj);
 }
 
 void Master::solve () {
@@ -55,13 +56,23 @@ void Master::solve () {
 
     for (int i = 0; i < this->data.getNItems(); i++) duals[i] = master.getDual(this->constraints[i]);
 
+    vector <bool> col(this->data.getNItems());
     Subproblem subproblem(data, duals);
+    subproblem.solve(data, duals, col);
 
-    vector <int> column(this->data.getNItems);
-    subproblem.solve(data, dual, column);
-
+    // Creates column
+    IloNumColumn column = this->obj(1);
+    for (int i = 0; i < data.getNItems(); i++) column += this->constraints[i](col[i]);
     
+    IloNumVar var(column, 0, IloInfinity);
 
-    // Adicionando a colunas
+    // Sets name
+    char name[100];
+    sprintf(name, "lambda(%d)", this->A.size());
+    var.setName(name);
+
+    // Adds variable
+    lambda.add(var);
+    this->A.push_back(col);
 
 }

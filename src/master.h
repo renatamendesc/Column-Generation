@@ -2,6 +2,7 @@
 #define MASTER_H
 
 #include "data.h"
+#include <vector>
 #include <ilcplex/ilocplex.h>
 
 class Master {
@@ -12,10 +13,11 @@ class Master {
 
         IloNumVarArray lambda;
 
-        IloExpr obj; // Objective function
+        IloObjective obj;
+        IloExpr objExpression; // Objective function
         IloRangeArray constraints; // Constraints
 
-        std::vector <std::vector <bool>> itemExists;
+        std::vector <std::vector <bool>> A;
 
         Data data;
         double upperBound;

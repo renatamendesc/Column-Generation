@@ -2,6 +2,7 @@
 #define SUBPROBLEM_H
 
 #include "data.h"
+#include <vector>
 #include <ilcplex/ilocplex.h>
 
 #define MIP true
@@ -19,7 +20,7 @@ class Subproblem {
 
     public:
         Subproblem (Data &data, IloNumArray &duals);
-        void solve (Data &data, IloNumArray &duals, vector <int> &column);
+        double solve (Data &data, IloNumArray &duals, std::vector <bool> &column);
 
 };
 

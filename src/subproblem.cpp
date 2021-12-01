@@ -12,7 +12,7 @@ Subproblem::Subproblem (Data &data, IloNumArray &duals) {
     this->env.setName("Knapsack Problem");
     this->model.setName("Subproblem");
 
-    this->x = IloBoolVarArray(this->env, numberItems); // Variables
+    this->x = IloBoolVarArray(this->env, data.getNItems()); // Variables
 
     this->obj = IloExpr(env); // Objective function
 
@@ -28,7 +28,7 @@ Subproblem::Subproblem (Data &data, IloNumArray &duals) {
 
 }
 
-void Subproblem::solve (Data &data, IloNumArray &duals, vector <int> &column) {
+double Subproblem::solve (Data &data, IloNumArray &duals, vector <bool> &column) {
 
     double objectiveValue;
 
@@ -43,15 +43,14 @@ void Subproblem::solve (Data &data, IloNumArray &duals, vector <int> &column) {
         if (1 + objectiveValue < 0) {
 
             // Gets column
-            IloNumArray results(this->env, data.getNItems());
-            subproblem.getValues(results);
+            // IloNumArray results(this->env, data.getNItems());
+            // subproblem.getValues(results);
 
-            for (int i = 0; i < data.getNItems(); i++) {  
-                if (results[i] >= 0.9) column[i] = 1;
-                else column[i] = 0;
-            }
-
-            return objectiveValue;
+            // Adds value to column
+            for (int i = 0; i < data.getNItems(); i++) {
+                if (subproblem.getValue(x[i]) > 0.9) column[i] = true;
+                else column[i] = false;
+            }  
         }
 
     } else {
@@ -61,15 +60,18 @@ void Subproblem::solve (Data &data, IloNumArray &duals, vector <int> &column) {
         int weight[data.getNItems()];
 
         for (int i = 0; i < data.getNItems(); i++) {
-
-            profit[i] = duals[i];
+            profit[i] = duals[i] * 1000000;
             weight[i] = data.getItemWeight(i);
         }
 
-        objectiveValue = minknap(data.getNItems(), profit, weight, results, data.getBinCapacity());
+        objectiveValue = minknap(data.getNItems(), profit, weight, results, data.getBinCapacity()) / 1000000;
 
-        // Falta pegar resultados e adicionar coluna
-
+        // Adds value to column
+        for (int i = 0; i < data.getNItems(); i++) {
+            if (results[i] > 0.9) column[i] = true;
+            else column[i] = false;
+        }
     }
 
+    return objectiveValue;
 }
