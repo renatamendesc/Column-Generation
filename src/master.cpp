@@ -14,14 +14,12 @@ Master::Master (Data &data, double upperBound) {
     this->env.setName("Bin Packing Problem");
     this->model.setName("Master Problem");
 
-    int numberItems = data.getNItems();
-
-    this->lambda = IloNumVarArray(this->env, numberItems, 0, IloInfinity); // Variables
+    this->lambda = IloNumVarArray(this->env, this->data.getNItems(), 0, IloInfinity); // Variables
     this->objExpression = IloExpr(this->env); // Objective function
 
-    this->A = vector <vector <bool>>(numberItems, vector <bool> (numberItems, false)); // Matriz que indica se o item existe no pacote em questão
+    this->A = vector <vector <bool>>(this->data.getNItems(), vector <bool> (this->data.getNItems(), false)); // Matriz que indica se o item existe no pacote em questão
 
-    for (int i = 0; i < numberItems; i++) {
+    for (int i = 0; i < this->data.getNItems(); i++) {
 
         char name[100];
 
@@ -48,31 +46,54 @@ Master::Master (Data &data, double upperBound) {
 void Master::solve () {
 
     IloCplex master(this->model);
+    master.setOut(this->env.getNullStream());
 
-    master.solve(); // Depois adicionar exception
+    while (true) {
 
-    // Gets dual variables
-    IloNumArray duals(this->env, this->data.getNItems());
+        try {
+            master.solve(); // Try to solve master problem
+        } catch (IloException &e) {
+            cerr << e << endl;
+        }
 
-    for (int i = 0; i < this->data.getNItems(); i++) duals[i] = master.getDual(this->constraints[i]);
+        // if (master.getCplexStatus() == IloCplex::Infeasible) break;
 
-    vector <bool> col(this->data.getNItems());
-    Subproblem subproblem(data, duals);
-    subproblem.solve(data, duals, col);
+        // Gets dual variables
+        IloNumArray duals(this->env, this->data.getNItems());
 
-    // Creates column
-    IloNumColumn column = this->obj(1);
-    for (int i = 0; i < data.getNItems(); i++) column += this->constraints[i](col[i]);
-    
-    IloNumVar var(column, 0, IloInfinity);
+        for (int i = 0; i < this->data.getNItems(); i++) duals[i] = master.getDual(this->constraints[i]);
 
-    // Sets name
-    char name[100];
-    sprintf(name, "lambda(%d)", this->A.size());
-    var.setName(name);
+        // Creates subproblem
+        vector <bool> col(this->data.getNItems());
+        Subproblem subproblem(this->data, duals);
 
-    // Adds variable
-    lambda.add(var);
-    this->A.push_back(col);
+        if (subproblem.solve(this->data, duals, col)) {
 
+            // adiconar break se col tiver tamanho 0
+
+            // Creates column
+            IloNumColumn column = this->obj(1);
+            for (int i = 0; i < data.getNItems(); i++) column += this->constraints[i](col[i]);
+            
+            IloNumVar var(column, 0, IloInfinity);
+
+            // Sets name
+            char name[100];
+            sprintf(name, "lambda(%d)", this->A.size());
+            var.setName(name);
+
+            // Adds variable
+            lambda.add(var);
+            this->A.push_back(col);
+
+        } else {
+            break;
+        }
+
+        duals.clear();
+        duals.end();
+
+        // apagar subproblema
+
+    }
 }

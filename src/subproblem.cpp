@@ -14,11 +14,11 @@ Subproblem::Subproblem (Data &data, IloNumArray &duals) {
 
     this->x = IloBoolVarArray(this->env, data.getNItems()); // Variables
 
-    this->obj = IloExpr(env); // Objective function
+    this->objExpression = IloExpr(env); // Objective function
 
     // Writing objective function
-    for (int i = 0; i < data.getNItems(); i++) obj -= duals[i] * x[i];
-    this->model.add(IloMinimize(this->env, this->obj)); // Minimize objective function
+    for (int i = 0; i < data.getNItems(); i++) this->objExpression -= duals[i] * x[i];
+    this->model.add(IloMinimize(this->env, this->objExpression)); // Minimize objective function
 
     this->constraint = IloExpr(env); // Constraint
     
@@ -28,30 +28,40 @@ Subproblem::Subproblem (Data &data, IloNumArray &duals) {
 
 }
 
-double Subproblem::solve (Data &data, IloNumArray &duals, vector <bool> &column) {
+bool Subproblem::solve (Data &data, IloNumArray &duals, vector <bool> &column) {
 
     double objectiveValue;
+    bool flag = false;
 
     if (MIP) {
 
         IloCplex subproblem(this->model);
-        subproblem.solve(); // Adicionar exception
+        subproblem.setOut(this->env.getNullStream());
+
+        try {
+            subproblem.solve(); // Try to solve subproblem
+        } catch (IloException &e) {
+            cerr << e << endl;
+        }
 
         objectiveValue = subproblem.getObjValue();
 
         // Verifies if reduced cost is negative
         if (1 + objectiveValue < 0) {
-
-            // Gets column
+    
             // IloNumArray results(this->env, data.getNItems());
             // subproblem.getValues(results);
+            flag = true;
 
-            // Adds value to column
+            // Gets column
             for (int i = 0; i < data.getNItems(); i++) {
                 if (subproblem.getValue(x[i]) > 0.9) column[i] = true;
                 else column[i] = false;
-            }  
+            } 
         }
+
+        this->subproblem.clear();
+        this->subproblem.end();
 
     } else {
 
@@ -66,12 +76,20 @@ double Subproblem::solve (Data &data, IloNumArray &duals, vector <bool> &column)
 
         objectiveValue = minknap(data.getNItems(), profit, weight, results, data.getBinCapacity()) / 1000000;
 
-        // Adds value to column
-        for (int i = 0; i < data.getNItems(); i++) {
-            if (results[i] > 0.9) column[i] = true;
-            else column[i] = false;
+        if (1 + objectiveValue < 0) {
+
+            flag = true;
+
+            // Gets column
+            for (int i = 0; i < data.getNItems(); i++) {
+                if (results[i] > 0.9) column[i] = true;
+                else column[i] = false;
+            }
         }
     }
 
-    return objectiveValue;
+    this->model.end();
+    this->env.end();
+
+    return flag;
 }

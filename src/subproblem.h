@@ -15,12 +15,12 @@ class Subproblem {
 
         IloBoolVarArray x;
 
-        IloExpr obj;
+        IloExpr objExpression;
         IloExpr constraint;
 
     public:
         Subproblem (Data &data, IloNumArray &duals);
-        double solve (Data &data, IloNumArray &duals, std::vector <bool> &column);
+        bool solve (Data &data, IloNumArray &duals, std::vector <bool> &column);
 
 };
 
