@@ -43,7 +43,7 @@ Master::Master (Data &data, double upperBound) {
     this->model.add(this->obj);
 }
 
-void Master::solve () {
+void Master::solve (Node &node) {
 
     IloCplex master(this->model);
     master.setOut(this->env.getNullStream());

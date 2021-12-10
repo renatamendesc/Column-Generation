@@ -1,10 +1,40 @@
 #include "data.h"
 #include "master.h"
+#include "node.h"
 #include <iostream>
 #include <cstdio>
 #include <ilcplex/ilocplex.h>
 
 using namespace std;
+
+void search (Master &master) {
+
+    Node root;
+
+    master.solve(); // Column generation
+    pair <int, int> branching = root.getMostFractionedPair();
+
+    vector <Node> tree;
+
+    while (!tree.empty()) {
+
+        Node node;
+
+        // Depth search
+        node = tree.back();
+		tree.erase(tree.end());
+
+        if (!node.feasible) {
+
+            // Branching
+
+        } else {
+
+            // Solucao viavel
+
+        }
+    }
+}
 
 int main (int argc, char **argv) {
 
@@ -18,6 +48,7 @@ int main (int argc, char **argv) {
     // problem(data, __DBL_MAX__);
 
     Master master(data, __DBL_MAX__);
+    search(master);
 
     return 0;
 }

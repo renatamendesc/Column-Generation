@@ -2,6 +2,7 @@
 #define MASTER_H
 
 #include "data.h"
+#include "node.h"
 #include <vector>
 #include <ilcplex/ilocplex.h>
 
@@ -24,7 +25,7 @@ class Master {
 
     public:
         Master (Data &data, double upperBound);
-        void solve ();
+        void solve (Node &node);
 
 };
 
