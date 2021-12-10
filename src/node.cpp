@@ -2,7 +2,7 @@
 
 using namespace std;
 
-std::pair <int, int> getMostFractionalPair () {
+Node::pair <int, int> getMostFractionalPair () {
 
 
 

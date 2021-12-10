@@ -1,6 +1,8 @@
 #ifndef NODE_H
 #define NODE_H
 
+#include <iostream>
+#include <utility> 
 #include <vector>
 
 class Node {
@@ -18,4 +20,3 @@ class Node {
 
 };
 
-#endif
