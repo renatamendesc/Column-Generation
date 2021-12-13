@@ -45,8 +45,6 @@ int main (int argc, char **argv) {
     // for (int i = 0; i < data.getNItems(); i++) cout << "Weight " << i+1 << ": " << data.getItemWeight(i) << endl;
     // cout << endl << "Bin capacity: " << data.getBinCapacity() << endl;
 
-    // problem(data, __DBL_MAX__);
-
     Master master(data, __DBL_MAX__);
     search(master);
 
