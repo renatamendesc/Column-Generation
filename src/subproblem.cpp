@@ -55,7 +55,7 @@ bool Subproblem::solve (Data &data, IloNumArray &duals, vector <bool> &column) {
 
             // Gets column
             for (int i = 0; i < data.getNItems(); i++) {
-                if (subproblem.getValue(x[i]) > 0.9) column[i] = true;
+                if (subproblem.getValue(this->x[i]) > 0.9) column[i] = true;
                 else column[i] = false;
             } 
         }

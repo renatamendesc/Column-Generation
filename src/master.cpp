@@ -48,13 +48,14 @@ void Master::solve (Node &node) {
     IloCplex master(this->model);
     master.setOut(this->env.getNullStream());
 
-    while (true) {
+    try {
+        master.solve(); // Try to solve master problem
+    } catch (IloException &e) {
+        cerr << e << endl;
+    }
 
-        try {
-            master.solve(); // Try to solve master problem
-        } catch (IloException &e) {
-            cerr << e << endl;
-        }
+
+    while (true) {
 
         // if (master.getCplexStatus() == IloCplex::Infeasible) break;
 
@@ -93,7 +94,22 @@ void Master::solve (Node &node) {
         duals.clear();
         duals.end();
 
-        // apagar subproblema
+        // Apagar subproblema
+
+        try {
+            master.solve(); // Try to solve master problem
+        } catch (IloException &e) {
+            cerr << e << endl;
+        }
 
     }
+
+    // obs -> talvez essa parte esteja errada
+    vector <double> solution (this->lambda.getSize())
+
+    for (int i = 0; i < data.getNItems(); i++) solution[i] = master.getValue(this->lambda[i]);
+
+    // Atualiza node
+    node.updateNode(solution, this->A);
+
 }

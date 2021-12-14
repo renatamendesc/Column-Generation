@@ -11,8 +11,8 @@ void search (Master &master) {
 
     Node root;
 
-    master.solve(); // Column generation
-    pair <int, int> branching = root.getMostFractionedPair();
+    master.solve(Node &node); // Column generation
+    pair <int, int> branching = root.getMostFractionalPair();
 
     vector <Node> tree;
 
