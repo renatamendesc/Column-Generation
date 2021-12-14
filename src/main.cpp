@@ -11,10 +11,8 @@ void search (Master &master) {
 
     Node root;
 
-    master.solve(Node &node); // Column generation
-    pair <int, int> branching = root.getMostFractionalPair();
-
     vector <Node> tree;
+    tree.push_back(root);
 
     while (!tree.empty()) {
 
@@ -24,9 +22,24 @@ void search (Master &master) {
         node = tree.back();
 		tree.erase(tree.end());
 
-        if (!node.feasible) {
+        master.solve(Node &node);
 
-            // Branching
+        if (!node.feasible) { // Branching
+
+            pair <int, int> branching = node.getMostFractionalPair();
+
+            Node newNodeEnforce, newNodeExclude;
+
+            newNodeEnforce.exclude = node.exclude;
+            newNodeEnforce.enforce = node.enforce;
+            newNodeEnforce.enforce.push_back(branching);
+
+            newNodeExclude.exclude = node.exclude;
+            newNodeExclude.enforce = node.enforce;
+            newNodeExclude.exclude.push_back(branching);
+
+            tree.push_back(newNodeEnforce);
+            tree.push_back(newNodeExclude);
 
         } else {
 
