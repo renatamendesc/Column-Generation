@@ -28,10 +28,13 @@ Subproblem::Subproblem (Data &data, IloNumArray &duals) {
 
 }
 
-bool Subproblem::solve (Data &data, IloNumArray &duals, vector <bool> &column) {
+bool Subproblem::solve (Data &data, Node &node, IloNumArray &duals, vector <bool> &column, vector <vector <bool>> &A, IloNumVarArray &lambda) {
 
     double objectiveValue;
     bool flag = false;
+
+    node.enforcePair(this->model, this->x, A, lambda);
+    node.excludePair(this->model, this->x, A, lambda);
 
     if (MIP) {
 

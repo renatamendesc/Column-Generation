@@ -20,7 +20,7 @@ class Subproblem {
 
     public:
         Subproblem (Data &data, IloNumArray &duals);
-        bool solve (Data &data, IloNumArray &duals, std::vector <bool> &column);
+        bool solve (Data &data, Node &node, IloNumArray &duals, std::vector <bool> &column, std::vector <std::vector <bool>> &A, IloNumVarArray &lambda);
 
 };
 

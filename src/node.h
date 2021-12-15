@@ -20,8 +20,11 @@ class Node {
         bool feasible;
 
         // Metodos
-        void updateNode (std::vector <double> &solution, std::vector <std::vector <bool>> &A);
         std::pair <int, int> getMostFractionalPair ();
+        void updateNode (std::vector <double> &solution, std::vector <std::vector <bool>> &A);
+
+        void enforcePair (IloModel &pricing, IloBoolVarArray &x, std::vector <std::vector <bool>> &A, IloNumVarArray &lambda);
+        void excludePair (IloModel &pricing, IloBoolVarArray &x, std::vector <std::vector <bool>> &A, IloNumVarArray &lambda);
 
 };
 

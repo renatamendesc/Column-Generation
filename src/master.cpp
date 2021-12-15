@@ -68,7 +68,7 @@ void Master::solve (Node &node) {
         vector <bool> col(this->data.getNItems());
         Subproblem subproblem(this->data, duals);
 
-        if (subproblem.solve(this->data, duals, col)) {
+        if (subproblem.solve(this->data, node, duals, col, this->A, this->lambda)) {
 
             // adiconar break se col tiver tamanho 0
 
