@@ -15,7 +15,7 @@ Master::Master (Data &data, double upperBound) {
     this->model.setName("Master Problem");
 
     this->lambda = IloNumVarArray(this->env, this->data.getNItems(), 0, IloInfinity); // Variables
-    this->objExpression = IloExpr(this->env); // Objective function
+    this->objectiveFunction = IloExpr(this->env); // Objective function
 
     this->A = vector <vector <bool>>(this->data.getNItems(), vector <bool> (this->data.getNItems(), false)); // Matriz que indica se o item existe no pacote em questão
 
@@ -28,8 +28,9 @@ Master::Master (Data &data, double upperBound) {
         this->lambda[i].setName(name);
         this->model.add(this->lambda[i]);
 
-        this->objExpression += this->lambda[i]; // Adds to objective function
+        this->objectiveFunction += this->lambda[i]; // Adds to objective function
 
+        // Creates constraints
         sprintf(name, "c%d", i);
         this->constraints[i].setName(name);
 
@@ -39,7 +40,7 @@ Master::Master (Data &data, double upperBound) {
     }
 
     this->model.add(constraints);
-    this->obj = IloMinimize(this->env, this->objExpression);
+    this->obj = IloMinimize(this->env, this->objectiveFunction);
     this->model.add(this->obj);
 }
 
@@ -57,18 +58,23 @@ void Master::solve (Node &node) {
 
     while (true) {
 
-        // if (master.getCplexStatus() == IloCplex::Infeasible) break;
+        if (master.getCplexStatus() == IloCplex::Infeasible) break;
+
+        // Creates subproblem
+        Subproblem subproblem(this->data);
+
+        // Enforce and exclude nodes
+        node.enforcePair(subproblem.model, subproblem.x, this->A, this->lambda);
+        node.excludePair(subproblem.model, subproblem.x, this->A, this->lambda);
 
         // Gets dual variables
         IloNumArray duals(this->env, this->data.getNItems());
-
         for (int i = 0; i < this->data.getNItems(); i++) duals[i] = master.getDual(this->constraints[i]);
+        subproblem.addObjectiveFunction(this->data, duals);
 
-        // Creates subproblem
-        vector <bool> col(this->data.getNItems());
-        Subproblem subproblem(this->data, duals);
+        vector <bool> col(this->data.getNItems()); // Vector with column
 
-        if (subproblem.solve(this->data, node, duals, col, this->A, this->lambda)) {
+        if (subproblem.solve(this->data, duals, col)) {
 
             // adiconar break se col tiver tamanho 0
 
@@ -87,7 +93,15 @@ void Master::solve (Node &node) {
             lambda.add(var);
             this->A.push_back(col);
 
+            try {
+                master.solve(); // Try to solve master problem
+            } catch (IloException &e) {
+                cerr << e << endl;
+            }
+
         } else {
+
+            // Encerra geração de colunas
             break;
         }
 
@@ -96,20 +110,12 @@ void Master::solve (Node &node) {
 
         // Apagar subproblema
 
-        try {
-            master.solve(); // Try to solve master problem
-        } catch (IloException &e) {
-            cerr << e << endl;
-        }
-
     }
 
-    // obs -> talvez essa parte esteja errada
-    vector <double> solution (this->lambda.getSize())
-
+    // Atualiza node
+    vector <double> solution (this->lambda.getSize());
     for (int i = 0; i < data.getNItems(); i++) solution[i] = master.getValue(this->lambda[i]);
 
-    // Atualiza node
     node.updateNode(solution, this->A);
 
 }

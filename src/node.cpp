@@ -9,7 +9,7 @@ pair <int, int> Node::getMostFractionalPair () {
 
     int items = this->columns[0].size();
 
-    vector <vector <double>> pairValues (items, vector <bool> (items, false));
+    vector <vector <double>> pairValues (items, vector <double> (items, 0));
 
     for (int k = 0; k < this->solution.size(); k++) { // percorre pacote k
 

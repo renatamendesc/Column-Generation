@@ -3,7 +3,7 @@
 
 using namespace std;
 
-Subproblem::Subproblem (Data &data, IloNumArray &duals) {
+Subproblem::Subproblem (Data &data) {
 
     this->env = IloEnv();
     this->model = IloModel(this->env);
@@ -14,12 +14,6 @@ Subproblem::Subproblem (Data &data, IloNumArray &duals) {
 
     this->x = IloBoolVarArray(this->env, data.getNItems()); // Variables
 
-    this->objExpression = IloExpr(env); // Objective function
-
-    // Writing objective function
-    for (int i = 0; i < data.getNItems(); i++) this->objExpression -= duals[i] * x[i];
-    this->model.add(IloMinimize(this->env, this->objExpression)); // Minimize objective function
-
     this->constraint = IloExpr(env); // Constraint
     
     // Writing constraint
@@ -28,13 +22,20 @@ Subproblem::Subproblem (Data &data, IloNumArray &duals) {
 
 }
 
-bool Subproblem::solve (Data &data, Node &node, IloNumArray &duals, vector <bool> &column, vector <vector <bool>> &A, IloNumVarArray &lambda) {
+void addObjectiveFunction (Data &data, IloNumArray &duals) {
+
+    this->objectiveFunction = IloExpr(env); // Objective function
+
+    // Writing objective function
+    for (int i = 0; i < data.getNItems(); i++) this->objectiveFunction -= duals[i] * x[i];
+    this->model.add(IloMinimize(this->env, this->objectiveFunction)); // Minimize objective function
+
+}
+
+bool Subproblem::solve (Data &data, IloNumArray &duals, vector <bool> &column) {
 
     double objectiveValue;
     bool flag = false;
-
-    node.enforcePair(this->model, this->x, A, lambda);
-    node.excludePair(this->model, this->x, A, lambda);
 
     if (MIP) {
 
@@ -47,9 +48,11 @@ bool Subproblem::solve (Data &data, Node &node, IloNumArray &duals, vector <bool
             cerr << e << endl;
         }
 
+        // podar se for inviavel
+
         objectiveValue = subproblem.getObjValue();
 
-        // Verifies if reduced cost is negative
+        // Verifies if reduced cost is negative (gerar coluna)
         if (1 + objectiveValue < 0) {
     
             // IloNumArray results(this->env, data.getNItems());
@@ -58,8 +61,17 @@ bool Subproblem::solve (Data &data, Node &node, IloNumArray &duals, vector <bool
 
             // Gets column
             for (int i = 0; i < data.getNItems(); i++) {
-                if (subproblem.getValue(this->x[i]) > 0.9) column[i] = true;
-                else column[i] = false;
+
+                if (subproblem.getValue(this->x[i]) > 0.9) {
+
+                    this->x[i] = true;
+                    column[i] = true;
+
+                } else {
+                    
+                    this->x[i] = false;
+                    column[i] = false;
+                } 
             } 
         }
 

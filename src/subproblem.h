@@ -9,18 +9,20 @@
 
 class Subproblem {
 
-    private:
+    public:
+        // Atributos
         IloEnv env;
         IloModel model;
 
         IloBoolVarArray x;
 
-        IloExpr objExpression;
+        IloExpr objectiveFunction;
         IloExpr constraint;
 
-    public:
-        Subproblem (Data &data, IloNumArray &duals);
-        bool solve (Data &data, Node &node, IloNumArray &duals, std::vector <bool> &column, std::vector <std::vector <bool>> &A, IloNumVarArray &lambda);
+        // Metodos
+        Subproblem (Data &data);
+        void addObjectiveFunction (Data &data, IloNumArray &duals);
+        bool solve (Data &data, IloNumArray &duals, std::vector <bool> &column);
 
 };
 

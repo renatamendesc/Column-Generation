@@ -20,7 +20,7 @@ void search (Master &master) {
 
         // Depth search
         node = tree.back();
-		tree.erase(tree.end());
+        tree.erase(tree.end());
 
         master.solve(Node &node);
 
@@ -38,12 +38,15 @@ void search (Master &master) {
             newNodeExclude.enforce = node.enforce;
             newNodeExclude.exclude.push_back(branching);
 
+            // verifica se adiciona
+
             tree.push_back(newNodeEnforce);
             tree.push_back(newNodeExclude);
 
         } else {
 
             // Solucao viavel
+            // verifica melhor bound
 
         }
     }

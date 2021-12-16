@@ -15,7 +15,7 @@ class Master {
         IloNumVarArray lambda;
 
         IloObjective obj;
-        IloExpr objExpression; // Objective function
+        IloExpr objectiveFunction; // Objective function
         IloRangeArray constraints; // Constraints
 
         std::vector <std::vector <bool>> A;
