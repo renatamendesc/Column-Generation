@@ -11,6 +11,8 @@ class Node {
     public:
 
         // Atributos
+        double lowerBound = __DBL_MAX__;
+
         std::vector <double> solution;
         std::vector <std::vector <bool>> columns;
 
@@ -21,7 +23,7 @@ class Node {
 
         // Metodos
         std::pair <int, int> getMostFractionalPair ();
-        void updateNode (std::vector <double> &solution, std::vector <std::vector <bool>> &A);
+        void updateNode (std::vector <double> &solution, std::vector <std::vector <bool>> &A, double lowerBound);
 
         void enforcePair (IloModel &pricing, IloBoolVarArray &x, std::vector <std::vector <bool>> &A, IloNumVarArray &lambda);
         void excludePair (IloModel &pricing, IloBoolVarArray &x, std::vector <std::vector <bool>> &A, IloNumVarArray &lambda);

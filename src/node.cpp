@@ -42,10 +42,17 @@ pair <int, int> Node::getMostFractionalPair () {
     return fractionalPair;
 }
 
-void Node::updateNode (vector <double> &solution, vector <vector <bool>> &A) {
+void Node::updateNode (vector <double> &solution, vector <vector <bool>> &A, double lowerBound) {
 
+    this->lowerBound = lowerBound;
     this->solution = solution;
     this->columns = A;
+
+    if (this->lowerBound - (int)this->lowerBound == 0) { // Verifica se solucao eh inteira
+        this->feasible = true;
+    } else {
+        this->feasible = false;
+    }
 
 }
 
@@ -56,7 +63,7 @@ void Node::enforcePair (IloModel &pricing, IloBoolVarArray &x, vector <vector <b
         pricing.add(x[this->enforce[i].first] == x[this->enforce[i].second]); // Adds constraint
 
         for (int j = 0; j < A.size(); j++) {
-            if ((A[j][x[this->enforce[i].first]] == false && A[j][x[this->enforce[i].second]] == true) || (A[j][x[this->enforce[i].first]] == true && A[j][x[this->enforce[i].second]] == false))
+            if ((A[j][this->enforce[i].first] == false && A[j][this->enforce[i].second] == true) || (A[j][this->enforce[i].first] == true && A[j][this->enforce[i].second] == false))
                 lambda[j].setUB(0);
         }
     }
@@ -64,12 +71,12 @@ void Node::enforcePair (IloModel &pricing, IloBoolVarArray &x, vector <vector <b
 
 void Node::excludePair (IloModel &pricing, IloBoolVarArray &x, vector <vector <bool>> &A, IloNumVarArray &lambda) {
 
-    for (int i = 0; i < this->enforce.size(); i++) {
+    for (int i = 0; i < this->exclude.size(); i++) {
 
-        pricing.add(x[this->enforce[i].first] + x[this->enforce[i].second] <= 1); // Adds constraint
+        pricing.add(x[this->exclude[i].first] + x[this->exclude[i].second] <= 1); // Adds constraint
 
         for (int j = 0; j < A.size(); j++) {
-            if (A[j][x[this->enforce[i].first]] == true && A[j][x[this->enforce[i].second]] == true) lambda[j].setUB(0);
+            if (A[j][this->exclude[i].first] == true && A[j][this->exclude[i].second] == true) lambda[j].setUB(0);
         }
     }
 }

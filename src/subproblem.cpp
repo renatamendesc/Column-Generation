@@ -22,7 +22,7 @@ Subproblem::Subproblem (Data &data) {
 
 }
 
-void addObjectiveFunction (Data &data, IloNumArray &duals) {
+void Subproblem::addObjectiveFunction (Data &data, IloNumArray &duals) {
 
     this->objectiveFunction = IloExpr(env); // Objective function
 
@@ -50,10 +50,10 @@ bool Subproblem::solve (Data &data, IloNumArray &duals, vector <bool> &column) {
 
         // podar se for inviavel
 
-        objectiveValue = subproblem.getObjValue();
+        objectiveValue = 1 + subproblem.getObjValue();
 
         // Verifies if reduced cost is negative (gerar coluna)
-        if (1 + objectiveValue < 0) {
+        if (objectiveValue < 0) {
     
             // IloNumArray results(this->env, data.getNItems());
             // subproblem.getValues(results);
@@ -64,19 +64,19 @@ bool Subproblem::solve (Data &data, IloNumArray &duals, vector <bool> &column) {
 
                 if (subproblem.getValue(this->x[i]) > 0.9) {
 
-                    this->x[i] = true;
+                    // this->x[i] = true;
                     column[i] = true;
 
                 } else {
                     
-                    this->x[i] = false;
+                    // this->x[i] = false;
                     column[i] = false;
                 } 
             } 
         }
 
-        this->subproblem.clear();
-        this->subproblem.end();
+        subproblem.clear();
+        subproblem.end();
 
     } else {
 
@@ -89,11 +89,11 @@ bool Subproblem::solve (Data &data, IloNumArray &duals, vector <bool> &column) {
             weight[i] = data.getItemWeight(i);
         }
 
-        objectiveValue = minknap(data.getNItems(), profit, weight, results, data.getBinCapacity()) / 1000000;
+        objectiveValue = 1 + minknap(data.getNItems(), profit, weight, results, data.getBinCapacity()) / 1000000;
 
-        if (1 + objectiveValue < 0) {
+        if (objectiveValue < 0) {
 
-            flag = true;
+            // flag = true;
 
             // Gets column
             for (int i = 0; i < data.getNItems(); i++) {
@@ -106,5 +106,6 @@ bool Subproblem::solve (Data &data, IloNumArray &duals, vector <bool> &column) {
     this->model.end();
     this->env.end();
 
-    return flag;
+    return objectiveValue;
+
 }

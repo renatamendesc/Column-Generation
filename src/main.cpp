@@ -3,13 +3,20 @@
 #include "node.h"
 #include <iostream>
 #include <cstdio>
+#include <ctime>
 #include <ilcplex/ilocplex.h>
 
 using namespace std;
 
 void search (Master &master) {
 
-    Node root;
+    clock_t start = clock(); // Starts time counting
+    double time;
+
+    Node root, bestNode;
+
+    master.solve(root);
+    bestNode = root;
 
     vector <Node> tree;
     tree.push_back(root);
@@ -22,33 +29,45 @@ void search (Master &master) {
         node = tree.back();
         tree.erase(tree.end());
 
-        master.solve(Node &node);
-
         if (!node.feasible) { // Branching
 
             pair <int, int> branching = node.getMostFractionalPair();
 
-            Node newNodeEnforce, newNodeExclude;
+            for (int i = 0; i < 2; i++) {
 
-            newNodeEnforce.exclude = node.exclude;
-            newNodeEnforce.enforce = node.enforce;
-            newNodeEnforce.enforce.push_back(branching);
+                Node newNode;
 
-            newNodeExclude.exclude = node.exclude;
-            newNodeExclude.enforce = node.enforce;
-            newNodeExclude.exclude.push_back(branching);
+                newNode.exclude = node.exclude;
+                newNode.enforce = node.enforce;
 
-            // verifica se adiciona
+                if (i == 0) { // Enforce
 
-            tree.push_back(newNodeEnforce);
-            tree.push_back(newNodeExclude);
+                    newNode.enforce.push_back(branching);
 
-        } else {
+                } else { // Exclude
 
-            // Solucao viavel
-            // verifica melhor bound
+                    newNode.exclude.push_back(branching);
+                }
 
+                master.solve(newNode);
+
+                if (newNode.lowerBound < bestNode.lowerBound) {
+
+                    tree.push_back(newNode);
+                }
+            }
+
+        } else { // Verifies best node
+
+            if (node.lowerBound < bestNode.lowerBound) {
+
+                bestNode = node;
+            }
         }
+
+		clock_t end = clock();
+		time = ((double) (end - start)) / CLOCKS_PER_SEC;
+		// if(time > 600) break;
     }
 }
 
@@ -61,7 +80,7 @@ int main (int argc, char **argv) {
     // for (int i = 0; i < data.getNItems(); i++) cout << "Weight " << i+1 << ": " << data.getItemWeight(i) << endl;
     // cout << endl << "Bin capacity: " << data.getBinCapacity() << endl;
 
-    Master master(data, __DBL_MAX__);
+    Master master(data);
     search(master);
 
     return 0;

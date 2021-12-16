@@ -3,10 +3,9 @@
 
 using namespace std;
 
-Master::Master (Data &data, double upperBound) {
+Master::Master (Data &data) {
 
     this->data = data;
-    this->upperBound = upperBound;
 
     this->env = IloEnv();
     this->model = IloModel(this->env);
@@ -55,7 +54,6 @@ void Master::solve (Node &node) {
         cerr << e << endl;
     }
 
-
     while (true) {
 
         if (master.getCplexStatus() == IloCplex::Infeasible) break;
@@ -74,9 +72,9 @@ void Master::solve (Node &node) {
 
         vector <bool> col(this->data.getNItems()); // Vector with column
 
-        if (subproblem.solve(this->data, duals, col)) {
+        if (subproblem.solve(this->data, duals, col) < 0) {
 
-            // adiconar break se col tiver tamanho 0
+            // Adiconar break se col tiver tamanho 0
 
             // Creates column
             IloNumColumn column = this->obj(1);
@@ -101,8 +99,7 @@ void Master::solve (Node &node) {
 
         } else {
 
-            // Encerra geração de colunas
-            break;
+            break; // Encerra geração de colunas
         }
 
         duals.clear();
@@ -116,6 +113,6 @@ void Master::solve (Node &node) {
     vector <double> solution (this->lambda.getSize());
     for (int i = 0; i < data.getNItems(); i++) solution[i] = master.getValue(this->lambda[i]);
 
-    node.updateNode(solution, this->A);
+    node.updateNode(solution, this->A, master.getObjValue());
 
 }

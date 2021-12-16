@@ -21,10 +21,9 @@ class Master {
         std::vector <std::vector <bool>> A;
 
         Data data;
-        double upperBound;
 
     public:
-        Master (Data &data, double upperBound);
+        Master (Data &data);
         void solve (Node &node);
 
 };
