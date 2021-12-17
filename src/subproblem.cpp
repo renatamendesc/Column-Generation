@@ -32,7 +32,7 @@ void Subproblem::addObjectiveFunction (Data &data, IloNumArray &duals) {
 
 }
 
-bool Subproblem::solve (Data &data, IloNumArray &duals, vector <bool> &column) {
+bool Subproblem::solve (Data &data, Node &node, IloNumArray &duals, vector <bool> &column) {
 
     double objectiveValue;
     bool flag = false;
@@ -48,7 +48,9 @@ bool Subproblem::solve (Data &data, IloNumArray &duals, vector <bool> &column) {
             cerr << e << endl;
         }
 
-        // podar se for inviavel
+        if (subproblem.getCplexStatus() == IloCplex::Infeasible) {
+            node.prune = true;
+        } 
 
         objectiveValue = 1 + subproblem.getObjValue();
 
@@ -57,7 +59,7 @@ bool Subproblem::solve (Data &data, IloNumArray &duals, vector <bool> &column) {
     
             // IloNumArray results(this->env, data.getNItems());
             // subproblem.getValues(results);
-            flag = true;
+            // flag = true;
 
             // Gets column
             for (int i = 0; i < data.getNItems(); i++) {

@@ -22,7 +22,7 @@ class Subproblem {
         // Metodos
         Subproblem (Data &data);
         void addObjectiveFunction (Data &data, IloNumArray &duals);
-        bool solve (Data &data, IloNumArray &duals, std::vector <bool> &column);
+        bool solve (Data &data, Node &node, IloNumArray &duals, std::vector <bool> &column);
 
 };
 

@@ -51,8 +51,7 @@ void search (Master &master) {
 
                 master.solve(newNode);
 
-                if (newNode.lowerBound < bestNode.lowerBound) {
-
+                if ((newNode.lowerBound < bestNode.lowerBound) && !newNode.prune) { // Se node nao foi podado
                     tree.push_back(newNode);
                 }
             }
@@ -60,14 +59,13 @@ void search (Master &master) {
         } else { // Verifies best node
 
             if (node.lowerBound < bestNode.lowerBound) {
-
                 bestNode = node;
             }
         }
 
 		clock_t end = clock();
 		time = ((double) (end - start)) / CLOCKS_PER_SEC;
-		// if(time > 600) break;
+		// if (time > 600) break;
     }
 }
 
@@ -80,7 +78,8 @@ int main (int argc, char **argv) {
     // for (int i = 0; i < data.getNItems(); i++) cout << "Weight " << i+1 << ": " << data.getItemWeight(i) << endl;
     // cout << endl << "Bin capacity: " << data.getBinCapacity() << endl;
 
-    Master master(data);
+    Master master(data); // Create master problem
+
     search(master);
 
     return 0;

@@ -48,15 +48,18 @@ void Master::solve (Node &node) {
     IloCplex master(this->model);
     master.setOut(this->env.getNullStream());
 
-    try {
-        master.solve(); // Try to solve master problem
-    } catch (IloException &e) {
-        cerr << e << endl;
-    }
-
     while (true) {
 
-        if (master.getCplexStatus() == IloCplex::Infeasible) break;
+        try {
+            master.solve(); // Try to solve master problem
+        } catch (IloException &e) {
+            cerr << e << endl;
+        }
+
+        if (master.getCplexStatus() == IloCplex::Infeasible) {
+            node.prune = true;
+            break;
+        } 
 
         // Creates subproblem
         Subproblem subproblem(this->data);
@@ -72,13 +75,14 @@ void Master::solve (Node &node) {
 
         vector <bool> col(this->data.getNItems()); // Vector with column
 
-        if (subproblem.solve(this->data, duals, col) < 0) {
-
-            // Adiconar break se col tiver tamanho 0
+        if (subproblem.solve(this->data, node, duals, col) < 0) {
 
             // Creates column
             IloNumColumn column = this->obj(1);
             for (int i = 0; i < data.getNItems(); i++) column += this->constraints[i](col[i]);
+
+            // Verificar se gerou coluna viavel
+            // Se nao gerou, podar
             
             IloNumVar var(column, 0, IloInfinity);
 
@@ -90,12 +94,6 @@ void Master::solve (Node &node) {
             // Adds variable
             lambda.add(var);
             this->A.push_back(col);
-
-            try {
-                master.solve(); // Try to solve master problem
-            } catch (IloException &e) {
-                cerr << e << endl;
-            }
 
         } else {
 
@@ -110,9 +108,12 @@ void Master::solve (Node &node) {
     }
 
     // Atualiza node
-    vector <double> solution (this->lambda.getSize());
-    for (int i = 0; i < data.getNItems(); i++) solution[i] = master.getValue(this->lambda[i]);
+    if (!node.prune) {
 
-    node.updateNode(solution, this->A, master.getObjValue());
+        vector <double> solution (this->lambda.getSize());
+        for (int i = 0; i < data.getNItems(); i++) solution[i] = master.getValue(this->lambda[i]);
+
+        node.updateNode(solution, this->A, master.getObjValue());
+    }
 
 }

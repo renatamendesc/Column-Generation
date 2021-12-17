@@ -20,6 +20,7 @@ class Node {
         std::vector <std::pair<int, int>> enforce;
 
         bool feasible;
+        bool prune = false;
 
         // Metodos
         std::pair <int, int> getMostFractionalPair ();
