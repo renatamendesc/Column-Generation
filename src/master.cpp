@@ -48,6 +48,13 @@ void Master::solve (Node &node) {
     IloCplex master(this->model);
     master.setOut(this->env.getNullStream());
 
+    // Creates subproblem
+    Subproblem subproblem(this->data);
+
+    // Enforce and exclude nodes
+    node.enforcePair(subproblem.model, subproblem.x, this->A, this->lambda);
+    node.excludePair(subproblem.model, subproblem.x, this->A, this->lambda);
+
     while (true) {
 
         try {
@@ -61,13 +68,6 @@ void Master::solve (Node &node) {
             break;
         } 
 
-        // Creates subproblem
-        Subproblem subproblem(this->data);
-
-        // Enforce and exclude nodes
-        node.enforcePair(subproblem.model, subproblem.x, this->A, this->lambda);
-        node.excludePair(subproblem.model, subproblem.x, this->A, this->lambda);
-
         // Gets dual variables
         IloNumArray duals(this->env, this->data.getNItems());
         for (int i = 0; i < this->data.getNItems(); i++) duals[i] = master.getDual(this->constraints[i]);
@@ -76,6 +76,11 @@ void Master::solve (Node &node) {
         vector <bool> col(this->data.getNItems()); // Vector with column
 
         if (subproblem.solve(this->data, node, duals, col) < 0) {
+
+            duals.clear();
+            duals.end();
+
+            if (node.prune) break; // Podar se pricing for inviavel
 
             // Creates column
             IloNumColumn column = this->obj(1);
@@ -99,12 +104,6 @@ void Master::solve (Node &node) {
 
             break; // Encerra geração de colunas
         }
-
-        duals.clear();
-        duals.end();
-
-        // Apagar subproblema
-
     }
 
     // Atualiza node
@@ -115,5 +114,8 @@ void Master::solve (Node &node) {
 
         node.updateNode(solution, this->A, master.getObjValue());
     }
+
+    master.clear();
+    master.end();
 
 }

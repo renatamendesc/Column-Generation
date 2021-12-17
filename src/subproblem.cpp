@@ -93,6 +93,8 @@ bool Subproblem::solve (Data &data, Node &node, IloNumArray &duals, vector <bool
 
         objectiveValue = 1 + minknap(data.getNItems(), profit, weight, results, data.getBinCapacity()) / 1000000;
 
+        // Verificar se eh viavel
+
         if (objectiveValue < 0) {
 
             // flag = true;
