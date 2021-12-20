@@ -56,6 +56,21 @@ void Node::updateNode (vector <double> &solution, vector <vector <bool>> &A, dou
 
 }
 
+void Node::verifyFeasibleColumn (vector <bool> &column) {
+
+    for (int i = 0; i < this->enforce.size(); i++) {
+        if ((column[this->enforce[i].first] == false && column[this->enforce[i].second] == true) || (column[this->enforce[i].first] == true && column[this->enforce[i].second] == false)) {
+            this->prune = true;
+        }
+    }
+
+    for (int i = 0; i < this->exclude.size(); i++) {
+        if (column[this->exclude[i].first] == true && column[this->exclude[i].second] == true) {
+            this->prune = true;
+        }
+    }
+}
+
 void Node::enforcePair (IloModel &pricing, IloBoolVarArray &x, vector <vector <bool>> &A, IloNumVarArray &lambda) {
 
     for (int i = 0; i < this->enforce.size(); i++) {

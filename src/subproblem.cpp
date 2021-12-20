@@ -107,9 +107,6 @@ bool Subproblem::solve (Data &data, Node &node, IloNumArray &duals, vector <bool
         }
     }
 
-    this->model.end();
-    this->env.end();
-
     return objectiveValue;
 
 }

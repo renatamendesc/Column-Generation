@@ -31,28 +31,31 @@ void search (Master &master) {
 
         if (!node.feasible) { // Branching
 
-            pair <int, int> branching = node.getMostFractionalPair();
+            if (!node.prune) {
 
-            for (int i = 0; i < 2; i++) {
+                pair <int, int> branching = node.getMostFractionalPair();
 
-                Node newNode;
+                for (int i = 0; i < 2; i++) {
 
-                newNode.exclude = node.exclude;
-                newNode.enforce = node.enforce;
+                    Node newNode;
 
-                if (i == 0) { // Enforce
+                    newNode.exclude = node.exclude;
+                    newNode.enforce = node.enforce;
 
-                    newNode.enforce.push_back(branching);
+                    if (i == 0) { // Enforce
 
-                } else { // Exclude
+                        newNode.enforce.push_back(branching);
 
-                    newNode.exclude.push_back(branching);
-                }
+                    } else { // Exclude
 
-                master.solve(newNode);
+                        newNode.exclude.push_back(branching);
+                    }
 
-                if ((newNode.lowerBound < bestNode.lowerBound) && !newNode.prune) { // Se node nao foi podado
-                    tree.push_back(newNode);
+                    master.solve(newNode);
+
+                    if ((newNode.lowerBound < bestNode.lowerBound) && !newNode.prune) { // Se node nao foi podado
+                        tree.push_back(newNode);
+                    }
                 }
             }
 
@@ -79,7 +82,6 @@ int main (int argc, char **argv) {
     // cout << endl << "Bin capacity: " << data.getBinCapacity() << endl;
 
     Master master(data); // Create master problem
-
     search(master);
 
     return 0;

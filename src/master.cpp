@@ -66,7 +66,7 @@ void Master::solve (Node &node) {
         if (master.getCplexStatus() == IloCplex::Infeasible) {
             node.prune = true;
             break;
-        } 
+        }
 
         // Gets dual variables
         IloNumArray duals(this->env, this->data.getNItems());
@@ -82,12 +82,12 @@ void Master::solve (Node &node) {
 
             if (node.prune) break; // Podar se pricing for inviavel
 
+            node.verifyFeasibleColumn(col); // Verifica se gerou coluna inviavel
+            if (node.prune) break; // Podar se gerou coluna inviavel
+
             // Creates column
             IloNumColumn column = this->obj(1);
             for (int i = 0; i < data.getNItems(); i++) column += this->constraints[i](col[i]);
-
-            // Verificar se gerou coluna viavel
-            // Se nao gerou, podar
             
             IloNumVar var(column, 0, IloInfinity);
 
@@ -102,6 +102,9 @@ void Master::solve (Node &node) {
 
         } else {
 
+            duals.clear();
+            duals.end();
+
             break; // Encerra geração de colunas
         }
     }
@@ -114,6 +117,8 @@ void Master::solve (Node &node) {
 
         node.updateNode(solution, this->A, master.getObjValue());
     }
+
+    for (int i = 0; i < this->lambda.getSize(); i++) lambda[i].setUB(IloInfinity); // Reverter upper bounds
 
     master.clear();
     master.end();

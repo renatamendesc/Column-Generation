@@ -2,6 +2,7 @@
 #define SUBPROBLEM_H
 
 #include "data.h"
+#include "node.h"
 #include <vector>
 #include <ilcplex/ilocplex.h>
 
