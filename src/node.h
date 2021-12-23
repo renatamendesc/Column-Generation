@@ -13,7 +13,7 @@ class Node {
         // Atributos
         double lowerBound = __DBL_MAX__;
 
-        std::vector <double> solution;
+        IloNumArray solution;
         std::vector <std::vector <bool>> columns;
 
         std::vector <std::pair<int, int>> exclude;
@@ -24,12 +24,14 @@ class Node {
 
         // Metodos
         std::pair <int, int> getMostFractionalPair ();
-        void updateNode (std::vector <double> &solution, std::vector <std::vector <bool>> &A, double lowerBound);
+        void updateNode (IloNumArray &solution, std::vector <std::vector <bool>> &A, double lowerBound);
 
         void verifyFeasibleColumn (std::vector <bool> &column);
 
         void enforcePair (IloModel &pricing, IloBoolVarArray &x, std::vector <std::vector <bool>> &A, IloNumVarArray &lambda);
         void excludePair (IloModel &pricing, IloBoolVarArray &x, std::vector <std::vector <bool>> &A, IloNumVarArray &lambda);
+
+        void printNode (double time);
 
 };
 

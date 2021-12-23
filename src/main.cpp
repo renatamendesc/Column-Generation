@@ -16,7 +16,7 @@ void search (Master &master) {
     Node root, bestNode;
 
     master.solve(root);
-    bestNode = root;
+    // bestNode = root;
 
     vector <Node> tree;
     tree.push_back(root);
@@ -53,7 +53,7 @@ void search (Master &master) {
 
                     master.solve(newNode);
 
-                    if ((newNode.lowerBound < bestNode.lowerBound) && !newNode.prune) { // Se node nao foi podado
+                    if ((newNode.lowerBound <= bestNode.lowerBound - 1) && !newNode.prune) { // Se nao foi podado
                         tree.push_back(newNode);
                     }
                 }
@@ -68,8 +68,11 @@ void search (Master &master) {
 
 		clock_t end = clock();
 		time = ((double) (end - start)) / CLOCKS_PER_SEC;
-		// if (time > 600) break;
+		if (time > 600) break;
+
     }
+
+    bestNode.printNode(time);
 }
 
 int main (int argc, char **argv) {
@@ -77,7 +80,7 @@ int main (int argc, char **argv) {
     Data data;
     data.readData(argv[1]);
 
-    // cout << "Number of items: " << data.getNItems() << endl << endl;
+    cout << endl << "Number of items: " << data.getNItems() << endl << endl;
     // for (int i = 0; i < data.getNItems(); i++) cout << "Weight " << i+1 << ": " << data.getItemWeight(i) << endl;
     // cout << endl << "Bin capacity: " << data.getBinCapacity() << endl;
 

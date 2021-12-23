@@ -8,21 +8,24 @@ pair <int, int> Node::getMostFractionalPair () {
     double delta, minDelta = __DBL_MAX__;
 
     int items = this->columns[0].size();
+    int bins = this->columns.size();
 
     vector <vector <double>> pairValues (items, vector <double> (items, 0));
 
-    for (int k = 0; k < this->solution.size(); k++) { // percorre pacote k
+    for (int k = 0; k < bins; k++) { // percorre pacote k
 
-        vector <int> index;
+        if (this->solution[k] < 1 - __DBL_EPSILON__ && this->solution[k] > __DBL_EPSILON__) {
 
-        for (int i = 0; i < items; i++) {
-            if (this->columns[k][i] == 1) index.push_back(i); // verifica itens existentes no pacote k
-        }
+            vector <int> index;
 
-        for (int i = 0; i < index.size()-1; i++) {
-            for (int j = i + 1; j < index.size()-1; j++) {
-                pairValues[index[i]][index[j]] += this->solution[k];
-                // pairValues[index[j]][index[i]] += this->solution[k];
+            for (int i = 0; i < items; i++) {
+                if (this->columns[k][i] == 1) index.push_back(i); // verifica itens existentes no pacote k
+            }
+
+            for (int i = 0; i < index.size()-1; i++) {
+                for (int j = i + 1; j < index.size(); j++) {
+                    pairValues[index[i]][index[j]] += this->solution[k];
+                }
             }
         }
     }
@@ -30,7 +33,7 @@ pair <int, int> Node::getMostFractionalPair () {
     for (int i = 0; i < items-1; i++) {
         for (int j = i + 1; j < items; j++) {
 
-            delta = abs(0.5 - pairValues[i][j]);
+            delta = abs(pairValues[i][j] - 0.5);
 
             if (delta < minDelta) {
                 minDelta = delta;
@@ -42,7 +45,7 @@ pair <int, int> Node::getMostFractionalPair () {
     return fractionalPair;
 }
 
-void Node::updateNode (vector <double> &solution, vector <vector <bool>> &A, double lowerBound) {
+void Node::updateNode (IloNumArray &solution, vector <vector <bool>> &A, double lowerBound) {
 
     this->lowerBound = lowerBound;
     this->solution = solution;
@@ -93,5 +96,18 @@ void Node::excludePair (IloModel &pricing, IloBoolVarArray &x, vector <vector <b
         for (int j = 0; j < A.size(); j++) {
             if (A[j][this->exclude[i].first] == true && A[j][this->exclude[i].second] == true) lambda[j].setUB(0);
         }
+    }
+}
+
+void Node::printNode (double time) {
+
+    if (this->feasible) {
+
+        cout << endl << "Cost: " << this->lowerBound << " bins" << endl;
+        cout << "Time: " << time << endl;
+
+    } else {
+
+        cout << "No feasible solution was found!" << endl; 
     }
 }

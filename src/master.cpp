@@ -15,6 +15,7 @@ Master::Master (Data &data) {
 
     this->lambda = IloNumVarArray(this->env, this->data.getNItems(), 0, IloInfinity); // Variables
     this->objectiveFunction = IloExpr(this->env); // Objective function
+    this->constraints = IloRangeArray(this->env, this->data.getNItems());
 
     this->A = vector <vector <bool>>(this->data.getNItems(), vector <bool> (this->data.getNItems(), false)); // Matriz que indica se o item existe no pacote em questão
 
@@ -31,10 +32,9 @@ Master::Master (Data &data) {
 
         // Creates constraints
         sprintf(name, "c%d", i);
-        this->constraints[i].setName(name);
-
         this->constraints[i] = (this->lambda[i] == 1); // Adds to constraint
-
+        this->constraints[i].setName(name);
+        
         this->A[i][i] = true;
     }
 
@@ -68,22 +68,29 @@ void Master::solve (Node &node) {
             break;
         }
 
+        cout << "Objective value: " << master.getObjValue() << endl;
+
         // Gets dual variables
         IloNumArray duals(this->env, this->data.getNItems());
         for (int i = 0; i < this->data.getNItems(); i++) duals[i] = master.getDual(this->constraints[i]);
         subproblem.addObjectiveFunction(this->data, duals);
 
         vector <bool> col(this->data.getNItems()); // Vector with column
+        double reducedCost = subproblem.solve(this->data, node, duals, col);
 
-        if (subproblem.solve(this->data, node, duals, col) < 0) {
+        if (reducedCost <= -0.000001) {
 
             duals.clear();
             duals.end();
 
-            if (node.prune) break; // Podar se pricing for inviavel
+            if (node.prune) {
+                break; // Podar se pricing for inviavel
+            }
 
             node.verifyFeasibleColumn(col); // Verifica se gerou coluna inviavel
-            if (node.prune) break; // Podar se gerou coluna inviavel
+            if (node.prune) {
+                break; // Podar se gerou coluna inviavel
+            }
 
             // Creates column
             IloNumColumn column = this->obj(1);
@@ -100,6 +107,8 @@ void Master::solve (Node &node) {
             lambda.add(var);
             this->A.push_back(col);
 
+            cout << "GEROU COLUNA..." << endl;
+
         } else {
 
             duals.clear();
@@ -107,13 +116,16 @@ void Master::solve (Node &node) {
 
             break; // Encerra geração de colunas
         }
+
     }
 
     // Atualiza node
     if (!node.prune) {
 
-        vector <double> solution (this->lambda.getSize());
-        for (int i = 0; i < data.getNItems(); i++) solution[i] = master.getValue(this->lambda[i]);
+        // cout << "Colunas geradas: " << this->lambda.getSize() - this->data.getNItems() << endl;
+
+        IloNumArray solution (this->env, this->lambda.getSize());
+        master.getValues(solution, this->lambda);
 
         node.updateNode(solution, this->A, master.getObjValue());
     }

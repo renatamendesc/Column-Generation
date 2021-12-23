@@ -17,13 +17,14 @@ class Subproblem {
 
         IloBoolVarArray x;
 
-        IloExpr objectiveFunction;
+        IloObjective objective;
+
         IloExpr constraint;
 
         // Metodos
         Subproblem (Data &data);
         void addObjectiveFunction (Data &data, IloNumArray &duals);
-        bool solve (Data &data, Node &node, IloNumArray &duals, std::vector <bool> &column);
+        double solve (Data &data, Node &node, IloNumArray &duals, std::vector <bool> &column);
 
 };
 
