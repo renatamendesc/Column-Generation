@@ -16,7 +16,6 @@ void search (Master &master) {
     Node root, bestNode;
 
     master.solve(root);
-    // bestNode = root;
 
     vector <Node> tree;
     tree.push_back(root);
@@ -42,13 +41,14 @@ void search (Master &master) {
                     newNode.exclude = node.exclude;
                     newNode.enforce = node.enforce;
 
-                    if (i == 0) { // Enforce
+                    if (i == 0) { // Exclude
+
+                       newNode.exclude.push_back(branching);
+
+                    } else { // Enforce
 
                         newNode.enforce.push_back(branching);
 
-                    } else { // Exclude
-
-                        newNode.exclude.push_back(branching);
                     }
 
                     master.solve(newNode);
@@ -80,7 +80,7 @@ int main (int argc, char **argv) {
     Data data;
     data.readData(argv[1]);
 
-    cout << endl << "Number of items: " << data.getNItems() << endl << endl;
+    cout << endl << "Number of items: " << data.getNItems() << endl;
     // for (int i = 0; i < data.getNItems(); i++) cout << "Weight " << i+1 << ": " << data.getItemWeight(i) << endl;
     // cout << endl << "Bin capacity: " << data.getBinCapacity() << endl;
 

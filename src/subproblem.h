@@ -6,7 +6,7 @@
 #include <vector>
 #include <ilcplex/ilocplex.h>
 
-#define MIP true
+#define CPLEX true
 
 class Subproblem {
 

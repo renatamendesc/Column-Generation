@@ -46,6 +46,10 @@ Master::Master (Data &data) {
 void Master::solve (Node &node) {
 
     IloCplex master(this->model);
+
+    master.setParam(IloCplex::Param::TimeLimit, 60);
+    master.setParam(IloCplex::Param::Threads, 1);
+    master.setParam(IloCplex::Param::MIP::Tolerances::MIPGap, 1e-08);
     master.setOut(this->env.getNullStream());
 
     // Creates subproblem
@@ -68,54 +72,41 @@ void Master::solve (Node &node) {
             break;
         }
 
-        cout << "Objective value: " << master.getObjValue() << endl;
+        // cout << "Objective value: " << master.getObjValue() << endl;
 
         // Gets dual variables
         IloNumArray duals(this->env, this->data.getNItems());
         for (int i = 0; i < this->data.getNItems(); i++) duals[i] = master.getDual(this->constraints[i]);
+        
         subproblem.addObjectiveFunction(this->data, duals);
 
         vector <bool> col(this->data.getNItems()); // Vector with column
+
         double reducedCost = subproblem.solve(this->data, node, duals, col);
 
-        if (reducedCost <= -0.000001) {
+        duals.clear();
+        duals.end();
 
-            duals.clear();
-            duals.end();
+        node.verifyFeasibleColumn(col); // Verifica se gerou coluna inviavel
 
-            if (node.prune) {
-                break; // Podar se pricing for inviavel
-            }
+        if (reducedCost >= -0.000001 || node.prune) break; // Encerra geração de colunas
 
-            node.verifyFeasibleColumn(col); // Verifica se gerou coluna inviavel
-            if (node.prune) {
-                break; // Podar se gerou coluna inviavel
-            }
+        // Creates column
+        IloNumColumn column = this->obj(1);
+        for (int i = 0; i < data.getNItems(); i++) column += this->constraints[i](col[i]);
+        
+        IloNumVar var(column, 0, IloInfinity);
 
-            // Creates column
-            IloNumColumn column = this->obj(1);
-            for (int i = 0; i < data.getNItems(); i++) column += this->constraints[i](col[i]);
-            
-            IloNumVar var(column, 0, IloInfinity);
+        // Sets name
+        char name[100];
+        sprintf(name, "lambda(%d)", this->A.size());
+        var.setName(name);
 
-            // Sets name
-            char name[100];
-            sprintf(name, "lambda(%d)", this->A.size());
-            var.setName(name);
+        // Adds variable
+        lambda.add(var);
+        this->A.push_back(col);
 
-            // Adds variable
-            lambda.add(var);
-            this->A.push_back(col);
-
-            cout << "GEROU COLUNA..." << endl;
-
-        } else {
-
-            duals.clear();
-            duals.end();
-
-            break; // Encerra geração de colunas
-        }
+        // cout << "GEROU COLUNA..." << endl << endl;
 
     }
 

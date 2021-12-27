@@ -31,7 +31,7 @@ void Subproblem::addObjectiveFunction (Data &data, IloNumArray &duals) {
     IloExpr objectiveFunction (this->env);
 
     // Writing objective function
-    for (int i = 0; i < data.getNItems(); i++) objectiveFunction -= duals[i] * x[i];
+    for (int i = 0; i < data.getNItems(); ++i) objectiveFunction -= duals[i] * x[i];
 
     this->objective.setExpr(objectiveFunction);
     
@@ -41,9 +41,13 @@ double Subproblem::solve (Data &data, Node &node, IloNumArray &duals, vector <bo
 
     double objectiveValue;
 
-    if (MIP) {
+    if (CPLEX) {
 
         IloCplex subproblem(this->model);
+
+        subproblem.setParam(IloCplex::Param::TimeLimit, 60);
+        subproblem.setParam(IloCplex::Param::Threads, 1);
+        subproblem.setParam(IloCplex::Param::MIP::Tolerances::MIPGap, 1e-08);
         subproblem.setOut(this->env.getNullStream());
 
         try {
@@ -58,16 +62,12 @@ double Subproblem::solve (Data &data, Node &node, IloNumArray &duals, vector <bo
 
         objectiveValue = 1 + subproblem.getObjValue();
 
-        // Verifies if reduced cost is negative (gerar coluna)
-        if (objectiveValue <= -0.000001) {
+        // Gets column
+        for (int i = 0; i < data.getNItems(); i++) {
+            if (subproblem.getValue(this->x[i]) >= 0.9) column[i] = true;
+            else column[i] = false;
 
-            // Gets column
-            for (int i = 0; i < data.getNItems(); i++) {
-                if (subproblem.getValue(this->x[i]) >= 0.9) column[i] = true;
-                else column[i] = false;
-
-                //cout << "Coluna " << i << ": " << column[i] << endl;
-            }
+            //cout << "Coluna " << i << ": " << column[i] << endl;
         }
 
         subproblem.clear();
@@ -86,17 +86,15 @@ double Subproblem::solve (Data &data, Node &node, IloNumArray &duals, vector <bo
 
         objectiveValue = 1 -(minknap(data.getNItems(), profit, weight, results, data.getBinCapacity())) / 1000000;
 
-        if (objectiveValue <= -0.000001) {
-
-            // Gets column
-            for (int i = 0; i < data.getNItems(); i++) {
-                if (results[i] >= 0.9) column[i] = true;
-                else column[i] = false;
-            }
+        // Gets column
+        for (int i = 0; i < data.getNItems(); i++) {
+            if (results[i] >= 0.9) column[i] = true;
+            else column[i] = false;
         }
+        
     }
 
-    cout << "Reduced cost: " << objectiveValue << endl;
+    // cout << "Reduced cost: " << objectiveValue << endl;
 
     return objectiveValue;
 
