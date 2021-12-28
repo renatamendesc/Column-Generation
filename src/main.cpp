@@ -8,13 +8,14 @@
 
 using namespace std;
 
-void search (Master &master) {
+void search (Data &data) {
 
     clock_t start = clock(); // Starts time counting
     double time;
 
     Node root, bestNode;
 
+    Master master(data); // Create master problem
     master.solve(root);
 
     vector <Node> tree;
@@ -84,8 +85,7 @@ int main (int argc, char **argv) {
     // for (int i = 0; i < data.getNItems(); i++) cout << "Weight " << i+1 << ": " << data.getItemWeight(i) << endl;
     // cout << endl << "Bin capacity: " << data.getBinCapacity() << endl;
 
-    Master master(data); // Create master problem
-    search(master);
+    search(data);
 
     return 0;
 }

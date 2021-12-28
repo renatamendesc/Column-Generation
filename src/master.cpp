@@ -82,14 +82,14 @@ void Master::solve (Node &node) {
 
         vector <bool> col(this->data.getNItems()); // Vector with column
 
-        double reducedCost = subproblem.solve(this->data, node, duals, col);
+        double pricing = subproblem.solve(this->data, node, duals, col);
 
         duals.clear();
         duals.end();
 
         node.verifyFeasibleColumn(col); // Verifica se gerou coluna inviavel
 
-        if (reducedCost >= -0.000001 || node.prune) break; // Encerra geração de colunas
+        if (pricing >= -0.000001 || node.prune) break; // Encerra geração de colunas
 
         // Creates column
         IloNumColumn column = this->obj(1);

@@ -14,18 +14,15 @@ pair <int, int> Node::getMostFractionalPair () {
 
     for (int k = 0; k < bins; k++) { // percorre pacote k
 
-        if (this->solution[k] < 1 - __DBL_EPSILON__ && this->solution[k] > __DBL_EPSILON__) {
+        vector <int> insideBin;
 
-            vector <int> index;
+        for (int i = 0; i < items; i++) {
+            if (this->columns[k][i] == 1) insideBin.push_back(i); // verifica itens existentes no pacote k
+        }
 
-            for (int i = 0; i < items; i++) {
-                if (this->columns[k][i] == 1) index.push_back(i); // verifica itens existentes no pacote k
-            }
-
-            for (int i = 0; i < index.size()-1; i++) {
-                for (int j = i + 1; j < index.size(); j++) {
-                    pairValues[index[i]][index[j]] += this->solution[k];
-                }
+        for (int i = 0; i < insideBin.size()-1; i++) {
+            for (int j = i + 1; j < insideBin.size(); j++) {
+                pairValues[insideBin[i]][insideBin[j]] += this->solution[k];
             }
         }
     }
@@ -56,7 +53,6 @@ void Node::updateNode (IloNumArray &solution, vector <vector <bool>> &A, double 
     } else {
         this->feasible = false;
     }
-
 }
 
 void Node::verifyFeasibleColumn (vector <bool> &column) {

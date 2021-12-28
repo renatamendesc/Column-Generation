@@ -31,7 +31,7 @@ void Subproblem::addObjectiveFunction (Data &data, IloNumArray &duals) {
     IloExpr objectiveFunction (this->env);
 
     // Writing objective function
-    for (int i = 0; i < data.getNItems(); ++i) objectiveFunction -= duals[i] * x[i];
+    for (int i = 0; i < data.getNItems(); i++) objectiveFunction -= duals[i] * x[i];
 
     this->objective.setExpr(objectiveFunction);
     
@@ -80,21 +80,21 @@ double Subproblem::solve (Data &data, Node &node, IloNumArray &duals, vector <bo
         int weight[data.getNItems()];
 
         for (int i = 0; i < data.getNItems(); i++) {
-            profit[i] = duals[i] * 1000000;
+            profit[i] = duals[i] * 1e6;
             weight[i] = data.getItemWeight(i);
         }
 
-        objectiveValue = 1 -(minknap(data.getNItems(), profit, weight, results, data.getBinCapacity())) / 1000000;
+        objectiveValue = 1 -(minknap(data.getNItems(), profit, weight, results, data.getBinCapacity())) * 1e-6;
 
         // Gets column
         for (int i = 0; i < data.getNItems(); i++) {
             if (results[i] >= 0.9) column[i] = true;
             else column[i] = false;
         }
-        
+
     }
 
-    // cout << "Reduced cost: " << objectiveValue << endl;
+    // cout << "Pricing " << objectiveValue << endl;
 
     return objectiveValue;
 
