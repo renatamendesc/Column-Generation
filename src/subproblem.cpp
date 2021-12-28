@@ -27,7 +27,6 @@ Subproblem::Subproblem (Data &data) {
 
 void Subproblem::addObjectiveFunction (Data &data, IloNumArray &duals) {
 
-    // this->objectiveFunction = IloExpr(env); // Objective function
     IloExpr objectiveFunction (this->env);
 
     // Writing objective function
